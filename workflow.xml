@@ -1,0 +1,29 @@
+
+
+
+<workflow-app name="sqoop-wf" xmlns="uri:oozie:workflow:0.4">
+
+	<start to='myfirsthivejob' />
+
+	<action name="myfirsthivejob">
+		<sqoop xmlns="uri:oozie:sqoop-action:0.2">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<configuration>
+				<property>
+					<name>mapred.compress.map.output</name>
+					<value>true</value>
+				</property>
+			</configuration>
+			<command> list-tables --connect jdbc:mysql://localhost:3306/retail_db --username root --password cloudera </command>
+			<archive>mysql-connector-java.jar#mysql-connector-java.jar</archive>
+		</sqoop>
+		<ok to="myotherjob" />
+		<error to="errorcleanup" />
+	</action>
+	
+	<kill name="errorcleanup">
+	  <message>Sqoop failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	</kill>
+	<end name="myotherjob"/>
+</workflow-app>
